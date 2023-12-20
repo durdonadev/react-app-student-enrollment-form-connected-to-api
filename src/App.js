@@ -158,22 +158,43 @@ const AppFunction = () => {
     };
 
     const submitEdit = () => {
-        setStudents((prevStudents) => {
-            const updatedStudents = prevStudents.map((student) => {
-                if (student.id === editingStudentId) {
-                    const copy = {
-                        ...student,
-                        firstName: firstNameEditValue,
-                        lastName: lastNameEditValue,
-                        email: emailEditValue,
-                        className: classNameEditValue
-                    };
-                    return copy;
-                }
-                return student;
+        studentAPI
+            .update(editingStudentId, { firstName, lastName, email, className })
+            .then((_) => {
+                setStudents((prevStudents) => {
+                    // const updatedStudents = prevStudents.map((student) => {
+                    //     if (student.id === editingStudentId) {
+                    //         const copy = { ...student };
+                    //         copy.firstName = firstName;
+                    //         copy.lastName = lastName;
+                    //         copy.email = email;
+                    //         copy.className = className;
+                    //         return copy;
+                    //     }
+                    //     return student;
+                    // });
+                    // return updatedStudents;
+                    const copyStudents = [];
+                    for (let i = 0; i < prevStudents.length; i++) {
+                        const student = prevStudents[i];
+                        if (student.id === editingStudentId) {
+                            const copy = { ...student };
+                            copy.firstName = firstNameEditValue;
+                            copy.lastName = lastNameEditValue;
+                            copy.email = emailEditValue;
+                            copy.className = classNameEditValue;
+                            copyStudents.push(copy);
+                        } else {
+                            copyStudents.push(student);
+                        }
+                    }
+                    return copyStudents;
+                });
+            })
+            .catch((err) => {
+                console.log(err);
             });
-            return updatedStudents;
-        });
+
         setShowEditModal(false);
     };
 
