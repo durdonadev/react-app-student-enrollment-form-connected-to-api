@@ -3,7 +3,7 @@ class StudentAPI {
         this.endpoint = process.env.REACT_APP_API;
     }
 
-    async create(input) {
+    async add(input) {
         const { firstName, lastName, email, className } = input;
         try {
             const response = await fetch(`${this.endpoint}/students`, {

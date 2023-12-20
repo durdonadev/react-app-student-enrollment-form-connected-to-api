@@ -84,24 +84,23 @@ const AppFunction = () => {
             className.length <= 1
         ) {
             setInputError(true);
+            return;
         }
 
-        const newStudent = {
-            id: uuid(),
-            firstName,
-            lastName,
-            email,
-            className
-        };
-
-        setStudents((prevStudents) => {
-            const copyStudents = [...prevStudents, newStudent];
-            return copyStudents;
-        });
-        setFirstName("");
-        setLastName("");
-        setEmail("");
-        setClassName("");
+        studentAPI
+            .add({ firstName, lastName, email, className })
+            .then((response) => {
+                setFirstName("");
+                setLastName("");
+                setEmail("");
+                setClassName("");
+                setStudents((prevStudents) => {
+                    return [...prevStudents, response.data];
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     };
 
     const deleteStudent = (studentId) => {
@@ -218,10 +217,10 @@ const AppFunction = () => {
                         onChange={handleOnChangeClassName}
                     >
                         <option value="">Select Class</option>
-                        <option value="Algebra">Algebra</option>
-                        <option value="Geometry">Geometry</option>
-                        <option value="Journalism">Journalism</option>
-                        <option value="Literature">Literature</option>
+                        <option value="ALGEBRA">ALGEBRA</option>
+                        <option value="GEOMETRY">GEOMETRY</option>
+                        <option value="JOURNALISM">JOURNALISM</option>
+                        <option value="LITERATURE">LITERATURE</option>
                     </select>
 
                     <input type="submit" value="Submit"></input>
@@ -318,10 +317,10 @@ const AppFunction = () => {
                             onChange={handleClassNameEdit}
                         >
                             <option value="">Select Class</option>
-                            <option value="Algebra">Algebra</option>
-                            <option value="Geometry">Geometry</option>
-                            <option value="Journalism">Journalism</option>
-                            <option value="Literature">Literature</option>
+                            <option value="ALGEBRA">ALGEBRA</option>
+                            <option value="GEOMETRY">GEOMETRY</option>
+                            <option value="JOURNALISM">JOURNALISM</option>
+                            <option value="LITERATURE">LITERATURE</option>
                         </select>
                         <br />
                         <button className="save-btn" onClick={submitEdit}>
