@@ -103,13 +103,17 @@ const AppFunction = () => {
             });
     };
 
-    const deleteStudent = (studentId) => {
-        setStudents((prevStudents) => {
-            const keptStudents = prevStudents.filter((student) => {
-                return student.id !== studentId;
+    const deleteStudent = (id) => {
+        studentAPI
+            .deleteOne(id)
+            .then(() => {
+                setStudents((prevStudents) => {
+                    return prevStudents.filter((student) => student.id !== id);
+                });
+            })
+            .catch((err) => {
+                console.log(err);
             });
-            return keptStudents;
-        });
     };
 
     const handleFirstNameEdit = (e) => {
