@@ -19,6 +19,17 @@ const AppFunction = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingStudentId, setEditingStudentId] = useState("");
 
+    useEffect(() => {
+        studentAPI
+            .getAll()
+            .then((response) => {
+                setStudents(response.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
     const handleOnChangeFirstName = (e) => {
         const { value } = e.target;
         setFirstName(value);
