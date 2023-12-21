@@ -1,6 +1,6 @@
 import { studentAPI } from "./api/student.js";
 import React, { useState, useEffect } from "react";
-import { v4 as uuid } from "uuid";
+
 import "./App.css";
 
 const AppFunction = () => {
@@ -116,64 +116,47 @@ const AppFunction = () => {
             });
     };
 
-    const handleFirstNameEdit = (e) => {
+    const handleOnChangeFirstNameEdit = (e) => {
         setFirstNameEditValue(e.target.value);
     };
 
-    const handleLastNameEdit = (e) => {
+    const handleOnChangeLastNameEdit = (e) => {
         setLastNameEditValue(e.target.value);
     };
 
-    const handleEmailEdit = (e) => {
+    const handleOnChangeEmailEdit = (e) => {
         setEmailEditValue(e.target.value);
     };
 
-    const handleClassNameEdit = (e) => {
+    const handleOnChangeClassNameEdit = (e) => {
         setClassNameEditValue(e.target.value);
     };
 
     const editStudent = (studentId) => {
+        setEditingStudentId(studentId);
         setShowEditModal(true);
-
-        let firstName = "";
-        let lastName = "";
-        let email = "";
-        let className = "";
 
         for (const student of students) {
             if (student.id === studentId) {
-                firstName = student.firstName;
-                lastName = student.lastName;
-                email = student.email;
-                className = student.className;
+                setFirstNameEditValue(student.firstName);
+                setLastNameEditValue(student.lastName);
+                setEmailEditValue(student.email);
+                setClassNameEditValue(student.className);
                 break;
             }
         }
-
-        setFirstNameEditValue(firstName);
-        setLastNameEditValue(lastName);
-        setEmailEditValue(email);
-        setClassNameEditValue(className);
-        setEditingStudentId(studentId);
     };
 
     const submitEdit = () => {
         studentAPI
-            .update(editingStudentId, { firstName, lastName, email, className })
+            .update(editingStudentId, {
+                firstNameEditValue,
+                lastNameEditValue,
+                emailEditValue,
+                classNameEditValue
+            })
             .then((_) => {
                 setStudents((prevStudents) => {
-                    // const updatedStudents = prevStudents.map((student) => {
-                    //     if (student.id === editingStudentId) {
-                    //         const copy = { ...student };
-                    //         copy.firstName = firstName;
-                    //         copy.lastName = lastName;
-                    //         copy.email = email;
-                    //         copy.className = className;
-                    //         return copy;
-                    //     }
-                    //     return student;
-                    // });
-                    // return updatedStudents;
                     const copyStudents = [];
                     for (let i = 0; i < prevStudents.length; i++) {
                         const student = prevStudents[i];
@@ -314,7 +297,7 @@ const AppFunction = () => {
                             id="editingFirstName"
                             type="text"
                             value={firstNameEditValue}
-                            onChange={handleFirstNameEdit}
+                            onChange={handleOnChangeFirstNameEdit}
                         />
                         <br />
                         <label htmlFor="editingLastName">
@@ -324,7 +307,7 @@ const AppFunction = () => {
                             id="editingLastName"
                             type="text"
                             value={lastNameEditValue}
-                            onChange={handleLastNameEdit}
+                            onChange={handleOnChangeLastNameEdit}
                         />
                         <br />
                         <label htmlFor="editingemail">Student Email: </label>
@@ -332,14 +315,14 @@ const AppFunction = () => {
                             id="editingEmail"
                             type="email"
                             value={emailEditValue}
-                            onChange={handleEmailEdit}
+                            onChange={handleOnChangeEmailEdit}
                         />
                         <br />
                         <label htmlFor="editingClassName">Class: </label>
                         <select
                             id="editingClassName"
                             value={classNameEditValue}
-                            onChange={handleClassNameEdit}
+                            onChange={handleOnChangeClassNameEdit}
                         >
                             <option value="">Select Class</option>
                             <option value="ALGEBRA">ALGEBRA</option>
