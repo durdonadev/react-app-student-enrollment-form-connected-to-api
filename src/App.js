@@ -1,6 +1,6 @@
 import { studentAPI } from "./api/student.js";
 import React, { useState, useEffect } from "react";
-import { v4 as uuid } from "uuid";
+
 import "./App.css";
 
 const AppFunction = () => {
@@ -18,6 +18,17 @@ const AppFunction = () => {
     const [inputError, setInputError] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingStudentId, setEditingStudentId] = useState("");
+
+    useEffect(() => {
+        studentAPI
+            .getAll()
+            .then((response) => {
+                setStudents(response.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     const handleOnChangeFirstName = (e) => {
         const { value } = e.target;
@@ -73,93 +84,100 @@ const AppFunction = () => {
             className.length <= 1
         ) {
             setInputError(true);
+            return;
         }
 
-        const newStudent = {
-            id: uuid(),
-            firstName,
-            lastName,
-            email,
-            className
-        };
-
-        setStudents((prevStudents) => {
-            const copyStudents = [...prevStudents, newStudent];
-            return copyStudents;
-        });
-        setFirstName("");
-        setLastName("");
-        setEmail("");
-        setClassName("");
-    };
-
-    const deleteStudent = (studentId) => {
-        setStudents((prevStudents) => {
-            const keptStudents = prevStudents.filter((student) => {
-                return student.id !== studentId;
+        studentAPI
+            .add({ firstName, lastName, email, className })
+            .then((response) => {
+                setFirstName("");
+                setLastName("");
+                setEmail("");
+                setClassName("");
+                setStudents((prevStudents) => {
+                    return [...prevStudents, response.data];
+                });
+            })
+            .catch((err) => {
+                console.log(err);
             });
-            return keptStudents;
-        });
     };
 
-    const handleFirstNameEdit = (e) => {
+    const deleteStudent = (id) => {
+        studentAPI
+            .deleteOne(id)
+            .then(() => {
+                setStudents((prevStudents) => {
+                    return prevStudents.filter((student) => student.id !== id);
+                });
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+
+    const handleOnChangeFirstNameEdit = (e) => {
         setFirstNameEditValue(e.target.value);
     };
 
-    const handleLastNameEdit = (e) => {
+    const handleOnChangeLastNameEdit = (e) => {
         setLastNameEditValue(e.target.value);
     };
 
-    const handleEmailEdit = (e) => {
+    const handleOnChangeEmailEdit = (e) => {
         setEmailEditValue(e.target.value);
     };
 
-    const handleClassNameEdit = (e) => {
+    const handleOnChangeClassNameEdit = (e) => {
         setClassNameEditValue(e.target.value);
     };
 
     const editStudent = (studentId) => {
+        setEditingStudentId(studentId);
         setShowEditModal(true);
-
-        let firstName = "";
-        let lastName = "";
-        let email = "";
-        let className = "";
 
         for (const student of students) {
             if (student.id === studentId) {
-                firstName = student.firstName;
-                lastName = student.lastName;
-                email = student.email;
-                className = student.className;
+                setFirstNameEditValue(student.firstName);
+                setLastNameEditValue(student.lastName);
+                setEmailEditValue(student.email);
+                setClassNameEditValue(student.className);
                 break;
             }
         }
-
-        setFirstNameEditValue(firstName);
-        setLastNameEditValue(lastName);
-        setEmailEditValue(email);
-        setClassNameEditValue(className);
-        setEditingStudentId(studentId);
     };
 
     const submitEdit = () => {
-        setStudents((prevStudents) => {
-            const updatedStudents = prevStudents.map((student) => {
-                if (student.id === editingStudentId) {
-                    const copy = {
-                        ...student,
-                        firstName: firstNameEditValue,
-                        lastName: lastNameEditValue,
-                        email: emailEditValue,
-                        className: classNameEditValue
-                    };
-                    return copy;
-                }
-                return student;
+        studentAPI
+            .update(editingStudentId, {
+                firstNameEditValue,
+                lastNameEditValue,
+                emailEditValue,
+                classNameEditValue
+            })
+            .then((_) => {
+                setStudents((prevStudents) => {
+                    const copyStudents = [];
+                    for (let i = 0; i < prevStudents.length; i++) {
+                        const student = prevStudents[i];
+                        if (student.id === editingStudentId) {
+                            const copy = { ...student };
+                            copy.firstName = firstNameEditValue;
+                            copy.lastName = lastNameEditValue;
+                            copy.email = emailEditValue;
+                            copy.className = classNameEditValue;
+                            copyStudents.push(copy);
+                        } else {
+                            copyStudents.push(student);
+                        }
+                    }
+                    return copyStudents;
+                });
+            })
+            .catch((err) => {
+                console.log(err);
             });
-            return updatedStudents;
-        });
+
         setShowEditModal(false);
     };
 
@@ -207,10 +225,10 @@ const AppFunction = () => {
                         onChange={handleOnChangeClassName}
                     >
                         <option value="">Select Class</option>
-                        <option value="Algebra">Algebra</option>
-                        <option value="Geometry">Geometry</option>
-                        <option value="Journalism">Journalism</option>
-                        <option value="Literature">Literature</option>
+                        <option value="ALGEBRA">ALGEBRA</option>
+                        <option value="GEOMETRY">GEOMETRY</option>
+                        <option value="JOURNALISM">JOURNALISM</option>
+                        <option value="LITERATURE">LITERATURE</option>
                     </select>
 
                     <input type="submit" value="Submit"></input>
@@ -279,7 +297,7 @@ const AppFunction = () => {
                             id="editingFirstName"
                             type="text"
                             value={firstNameEditValue}
-                            onChange={handleFirstNameEdit}
+                            onChange={handleOnChangeFirstNameEdit}
                         />
                         <br />
                         <label htmlFor="editingLastName">
@@ -289,7 +307,7 @@ const AppFunction = () => {
                             id="editingLastName"
                             type="text"
                             value={lastNameEditValue}
-                            onChange={handleLastNameEdit}
+                            onChange={handleOnChangeLastNameEdit}
                         />
                         <br />
                         <label htmlFor="editingemail">Student Email: </label>
@@ -297,20 +315,20 @@ const AppFunction = () => {
                             id="editingEmail"
                             type="email"
                             value={emailEditValue}
-                            onChange={handleEmailEdit}
+                            onChange={handleOnChangeEmailEdit}
                         />
                         <br />
                         <label htmlFor="editingClassName">Class: </label>
                         <select
                             id="editingClassName"
                             value={classNameEditValue}
-                            onChange={handleClassNameEdit}
+                            onChange={handleOnChangeClassNameEdit}
                         >
                             <option value="">Select Class</option>
-                            <option value="Algebra">Algebra</option>
-                            <option value="Geometry">Geometry</option>
-                            <option value="Journalism">Journalism</option>
-                            <option value="Literature">Literature</option>
+                            <option value="ALGEBRA">ALGEBRA</option>
+                            <option value="GEOMETRY">GEOMETRY</option>
+                            <option value="JOURNALISM">JOURNALISM</option>
+                            <option value="LITERATURE">LITERATURE</option>
                         </select>
                         <br />
                         <button className="save-btn" onClick={submitEdit}>

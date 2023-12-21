@@ -3,7 +3,7 @@ class StudentAPI {
         this.endpoint = process.env.REACT_APP_API;
     }
 
-    async create(input) {
+    async add(input) {
         const { firstName, lastName, email, className } = input;
         try {
             const response = await fetch(`${this.endpoint}/students`, {
@@ -59,7 +59,6 @@ class StudentAPI {
     }
 
     async update(id, input) {
-        const { firstName, lastName, email, className } = input;
         try {
             const response = await fetch(`${this.endpoint}/students/${id}`, {
                 method: "PATCH",
@@ -67,10 +66,10 @@ class StudentAPI {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    firstName: firstName,
-                    lastName: lastName,
-                    email: email,
-                    className: className
+                    firstName: input.firstNameEditValue,
+                    lastName: input.lastNameEditValue,
+                    email: input.emailEditValue,
+                    className: input.classNameEditValue
                 })
             });
 
@@ -78,6 +77,8 @@ class StudentAPI {
                 const data = await response.json();
                 throw new Error(data.message);
             }
+
+            return await response.json();
         } catch (error) {
             console.log(error.message);
         }
